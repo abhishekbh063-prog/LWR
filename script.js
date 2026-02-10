@@ -1646,7 +1646,71 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
             summaryContainer.appendChild(card);
         });
     }
-
+loadSampleData() {
+        if (this.records.length === 0) {
+            const sampleData = [
+                {
+                    id: 1,
+                    date: '2024-01-15',
+                    laborerName: 'Ravi Kumar',
+                    taskCategory: 'Arecanut',
+                    taskDetail: 'Tree Cutting',
+                    unitType: 'Day',
+                    quantity: 1,
+                    rate: 500,
+                    totalEarned: 500,
+                    amountPaid: 300,
+                    balanceChange: 200,
+                    remarks: 'Partial payment'
+                },
+                {
+                    id: 2,
+                    date: '2024-01-16',
+                    laborerName: 'Ravi Kumar',
+                    taskCategory: 'Arecanut',
+                    taskDetail: 'Husking',
+                    unitType: 'Kg',
+                    quantity: 25,
+                    rate: 15,
+                    totalEarned: 375,
+                    amountPaid: 0,
+                    balanceChange: 375,
+                    remarks: 'No payment today'
+                },
+                {
+                    id: 3,
+                    date: '2024-01-17',
+                    laborerName: 'Sita Devi',
+                    taskCategory: 'Rice',
+                    taskDetail: 'Planting',
+                    unitType: 'Day',
+                    quantity: 1,
+                    rate: 400,
+                    totalEarned: 400,
+                    amountPaid: 400,
+                    balanceChange: 0,
+                    remarks: 'Full payment'
+                },
+                {
+                    id: 4,
+                    date: '2024-01-18',
+                    laborerName: 'Mohan Lal',
+                    taskCategory: 'Ginger',
+                    taskDetail: 'Weeding',
+                    unitType: 'Day',
+                    quantity: 1,
+                    rate: 350,
+                    totalEarned: 350,
+                    amountPaid: 500,
+                    balanceChange: -150,
+                    remarks: 'Advance given'
+                }
+            ];
+            
+            this.records = sampleData;
+            this.saveToStorage();
+        }
+    }
 
     saveToStorage() {
         localStorage.setItem('laborRecords', JSON.stringify(this.records));
@@ -1688,6 +1752,7 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
 // Initialize the system
 
 const laborSystem = new LaborTrackingSystem();
+
 
 
 
