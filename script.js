@@ -1690,20 +1690,6 @@ loadSampleData() {
                     amountPaid: 400,
                     balanceChange: 0,
                     remarks: 'Full payment'
-                },
-                {
-                    id: 4,
-                    date: '2024-01-18',
-                    laborerName: 'Mohan Lal',
-                    taskCategory: 'Ginger',
-                    taskDetail: 'Weeding',
-                    unitType: 'Day',
-                    quantity: 1,
-                    rate: 350,
-                    totalEarned: 350,
-                    amountPaid: 500,
-                    balanceChange: -150,
-                    remarks: 'Advance given'
                 }
             ];
             
@@ -1752,6 +1738,7 @@ loadSampleData() {
 // Initialize the system
 
 const laborSystem = new LaborTrackingSystem();
+
 
 
 
