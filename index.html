@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="styles.css">
     <script src="google-sheets-config.js"></script>
     <script src="google-sheets-sync.js"></script>
+    <script>
+        // Check authentication before loading page
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (isLoggedIn !== 'true') {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -34,6 +43,13 @@
                             <span id="langText">ಕನ್ನಡ</span>
                         </button>
                     </div>
+                    <button id="logoutBtn" 
+                            class="logout-btn"
+                            onclick="logout()"
+                            aria-label="Logout"
+                            title="Logout from the system">
+                        🚪 Logout
+                    </button>
                 </div>
             </div>
         </header>
@@ -413,5 +429,16 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                sessionStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('username');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
 </body>
+
 </html>
