@@ -390,6 +390,7 @@ class LaborTrackingSystem {
             this.updateSummary();
             this.updateLaborerFilter();
             this.updateLaborerSummary();
+            this.updateLaborerDatalist();
             this.renderWorkTags();
             this.updateTaskCategoryOptions();
             
@@ -1751,5 +1752,6 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
 // Initialize the system
 
 const laborSystem = new LaborTrackingSystem();
+
 
 
