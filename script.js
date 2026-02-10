@@ -318,7 +318,6 @@ class LaborTrackingSystem {
 
     init() {
         this.setupEventListeners();
-        this.loadSampleData();
         this.renderRecords();
         this.updateSummary();
         this.updateLaborerFilter();
@@ -1751,4 +1750,5 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
 }
 
 // Initialize the system
+
 const laborSystem = new LaborTrackingSystem();
