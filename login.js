@@ -1,7 +1,7 @@
 // Login credentials (in production, this should be handled server-side)
 const CREDENTIALS = {
-    username: 'admin',
-    password: 'admin123'
+    username: 'manju',
+    password: '9606'
 };
 
 // Check if user is already logged in
@@ -59,3 +59,4 @@ document.getElementById('username').addEventListener('input', () => {
 document.getElementById('password').addEventListener('input', () => {
     document.getElementById('errorMessage').classList.add('hidden');
 });
+
