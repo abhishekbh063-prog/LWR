@@ -1501,7 +1501,7 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
             deleteBtn.onclick = async () => await this.deleteRecord(record.id);
             
             row.innerHTML = `
-                <td>${new Date(record.date).toLocaleDateString()}</td>
+                <td>${new Date(record.date).toLocaleDateString('en-GB')}</td>
                 <td>${record.laborerName}</td>
                 <td>${this.getCategoryTranslation(record.taskCategory)}</td>
                 <td>${this.getTaskTranslation(record.taskDetail)}</td>
@@ -1738,6 +1738,7 @@ loadSampleData() {
 // Initialize the system
 
 const laborSystem = new LaborTrackingSystem();
+
 
 
 
