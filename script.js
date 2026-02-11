@@ -327,8 +327,9 @@ class LaborTrackingSystem {
         this.renderWorkTags();
         this.updateLanguage(); // Initialize language
         
-        // Set today's date as default
-        document.getElementById('date').valueAsDate = new Date();
+        // Set today's date as default in consistent format
+        const dateInput = document.getElementById('date');
+        dateInput.value = this.formatDateToISO(new Date());
         
         // Initialize auto-sync button state
         this.updateAutoSyncButton();
@@ -1089,10 +1090,9 @@ class LaborTrackingSystem {
                                     value = parseFloat(value) || 0;
                                 }
                                 
-                                // Convert date format
+                                // Convert date format - handle both DD/MM/YYYY and MM/DD/YYYY
                                 if (mappedField === 'date') {
-                                    const date = new Date(value);
-                                    value = date.toISOString().split('T')[0];
+                                    value = this.parseDateFromCSV(value);
                                 }
                                 
                                 record[mappedField] = value;
@@ -1134,7 +1134,7 @@ class LaborTrackingSystem {
         this.records.forEach((record, index) => {
             const runningBalance = this.calculateRunningBalance(record.laborerName, index);
             const status = this.getPaymentStatus(runningBalance);
-            const formattedDate = new Date(record.date).toLocaleDateString('en-US');
+            const formattedDate = this.formatDateForDisplay(record.date);
             
             csvContent += `${formattedDate},"${record.laborerName}","${record.taskCategory}","${record.taskDetail}","${record.unitType}",${record.quantity},${record.rate},${record.totalEarned},${record.amountPaid},${record.balanceChange},${runningBalance},"${status}","${record.remarks || ''}"\n`;
         });
@@ -1384,6 +1384,99 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
         }
     }
 
+    // Format date to ISO format (YYYY-MM-DD) to ensure consistency across devices
+    formatDateToISO(date) {
+        if (!date) return '';
+        
+        // If it's already a string in YYYY-MM-DD format, return it
+        if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            return date;
+        }
+        
+        // Convert to Date object if needed
+        const dateObj = date instanceof Date ? date : new Date(date);
+        
+        // Check if valid date
+        if (isNaN(dateObj.getTime())) {
+            return '';
+        }
+        
+        // Format as YYYY-MM-DD
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}`;
+    }
+
+    // Format date for display (DD/MM/YYYY)
+    formatDateForDisplay(dateString) {
+        if (!dateString) return '';
+        
+        // Parse YYYY-MM-DD format
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+            const [year, month, day] = parts;
+            return `${day}/${month}/${year}`;
+        }
+        
+        // Fallback: try to parse as date
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
+        return dateString;
+    }
+
+    // Parse date from CSV (handles DD/MM/YYYY, MM/DD/YYYY, and YYYY-MM-DD formats)
+    parseDateFromCSV(dateString) {
+        if (!dateString) return '';
+        
+        dateString = dateString.trim();
+        
+        // If already in YYYY-MM-DD format, return it
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+            return dateString;
+        }
+        
+        // Try to parse DD/MM/YYYY or MM/DD/YYYY format
+        const slashParts = dateString.split('/');
+        if (slashParts.length === 3) {
+            let day, month, year;
+            
+            // Check if year is first (YYYY/MM/DD)
+            if (slashParts[0].length === 4) {
+                [year, month, day] = slashParts;
+            } 
+            // Assume DD/MM/YYYY format (common in most countries)
+            else {
+                [day, month, year] = slashParts;
+            }
+            
+            // Validate and format
+            const dayNum = parseInt(day, 10);
+            const monthNum = parseInt(month, 10);
+            const yearNum = parseInt(year, 10);
+            
+            if (dayNum >= 1 && dayNum <= 31 && monthNum >= 1 && monthNum <= 12) {
+                const fullYear = yearNum < 100 ? 2000 + yearNum : yearNum;
+                return `${fullYear}-${String(monthNum).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+            }
+        }
+        
+        // Fallback: try native Date parsing
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+            return this.formatDateToISO(date);
+        }
+        
+        return dateString;
+    }
+
     updateTaskDetails(category) {
         const taskDetailSelect = document.getElementById('taskDetail');
         taskDetailSelect.innerHTML = `<option value="">${this.getTranslation('selectTask')}</option>`;
@@ -1403,9 +1496,13 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
         submitButton.classList.add('loading');
         
         setTimeout(async () => {
+            // Get date input and ensure consistent format (YYYY-MM-DD)
+            const dateInput = document.getElementById('date');
+            const dateValue = dateInput.value || this.formatDateToISO(new Date());
+            
             const formData = {
                 id: Date.now(),
-                date: document.getElementById('date').value,
+                date: dateValue,
                 laborerName: document.getElementById('laborerName').value,
                 taskCategory: document.getElementById('taskCategory').value,
                 taskDetail: document.getElementById('taskDetail').value,
@@ -1430,7 +1527,7 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
             
             // Reset form with animation
             document.getElementById('entryForm').reset();
-            document.getElementById('date').valueAsDate = new Date();
+            dateInput.value = this.formatDateToISO(new Date());
             document.getElementById('taskDetail').innerHTML = '<option value="">Select Task</option>';
             
             // Reset remarks dropdown and input
@@ -1501,7 +1598,7 @@ For detailed instructions, open google-sheets-config.js in a text editor.`
             deleteBtn.onclick = async () => await this.deleteRecord(record.id);
             
             row.innerHTML = `
-                <td>${new Date(record.date).toLocaleDateString('en-GB')}</td>
+                <td>${this.formatDateForDisplay(record.date)}</td>
                 <td>${record.laborerName}</td>
                 <td>${this.getCategoryTranslation(record.taskCategory)}</td>
                 <td>${this.getTaskTranslation(record.taskDetail)}</td>
