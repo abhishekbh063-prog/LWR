@@ -94,11 +94,14 @@ function syncRecords(records) {
     // Add records
     if (records && records.length > 0) {
       records.forEach(record => {
-        // Format date properly
+        // Format date consistently as DD/MM/YYYY for Google Sheets
         let dateValue = record.date;
-        if (typeof dateValue === 'string') {
-          // Convert string date to proper format
-          dateValue = new Date(dateValue).toLocaleDateString();
+        if (typeof dateValue === 'string' && dateValue) {
+          // Parse YYYY-MM-DD format and convert to DD/MM/YYYY
+          const parts = dateValue.split('-');
+          if (parts.length === 3) {
+            dateValue = `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
+          }
         }
         
         sheet.appendRow([
@@ -116,6 +119,10 @@ function syncRecords(records) {
           record.remarks || ''
         ]);
       });
+      
+      // Format the Date column as plain text to prevent auto-formatting
+      const dateColumnRange = sheet.getRange(2, 2, records.length, 1); // Column B (Date)
+      dateColumnRange.setNumberFormat('@'); // @ means plain text format
     }
     
     // Auto-resize columns
@@ -234,19 +241,33 @@ function loadRecords() {
       const row = data[i];
       if (!row[0]) continue; // Skip empty rows
       
-      // Format date properly
+      // Format date properly - convert from DD/MM/YYYY to YYYY-MM-DD
       let dateValue = row[1];
       if (dateValue instanceof Date) {
-        dateValue = Utilities.formatDate(dateValue, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-      } else if (typeof dateValue === 'string') {
-        // Try to parse and reformat
-        try {
-          const d = new Date(dateValue);
-          if (!isNaN(d.getTime())) {
-            dateValue = Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+        // If it's a Date object, format it
+        const year = dateValue.getFullYear();
+        const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+        const day = String(dateValue.getDate()).padStart(2, '0');
+        dateValue = `${year}-${month}-${day}`;
+      } else if (typeof dateValue === 'string' && dateValue) {
+        // If it's a string in DD/MM/YYYY format, convert to YYYY-MM-DD
+        const parts = dateValue.split('/');
+        if (parts.length === 3) {
+          const [day, month, year] = parts;
+          dateValue = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        } else {
+          // Try to parse as date
+          try {
+            const d = new Date(dateValue);
+            if (!isNaN(d.getTime())) {
+              const year = d.getFullYear();
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              dateValue = `${year}-${month}-${day}`;
+            }
+          } catch (e) {
+            // Keep original value if parsing fails
           }
-        } catch (e) {
-          // Keep original value if parsing fails
         }
       }
       
